@@ -143,7 +143,8 @@ def load_data(city, month, day):
         df = df[df['day_of_week'] == day]
     if month != 'all':
         df = df[df['month'] == month]
-
+    df.drop('day_of_week',axis=1,inplace=True)
+    df.drop('month',axis=1,inplace=True)
     return df
 
 
@@ -153,6 +154,8 @@ def time_stats(df):
     print('\nCalculating The Most Frequent Times of Travel...\n')
     start_time = time.time()
 
+    df['day_of_week'] = pd.to_datetime(df['Start Time']).dt.dayofweek
+    df['month'] = pd.to_datetime(df['Start Time']).dt.month
     #temporary_df = pd.read_csv(city)
     # TO DO: display the most common month
     most_freq_month = df['month'].mode()[0]
@@ -172,7 +175,9 @@ def time_stats(df):
     df['hour']=pd.to_datetime(df['Start Time']).dt.hour
     most_freq_hour = df['hour'].mode()[0]
     print('The most common hour for travel is {}'.format(most_freq_hour))
-
+    df.drop('hour',axis=1,inplace=True)
+    df.drop('day_of_week',axis=1,inplace=True)
+    df.drop('month',axis=1,inplace=True)
     print("\nThis took %s seconds." % (time.time() - start_time))
     print('-'*40)
 
@@ -266,6 +271,31 @@ def user_stats(df):
     print("\nThis took %s seconds." % (time.time() - start_time))
     print('-'*40)
 
+def display_data(df):
+    choice = input('Would you like to read some of the raw data? Yes/No ').lower()
+    print()
+    if choice=='yes' or choice=='y' or choice=='yus':
+        choice=True
+    elif choice=='no' or choice=='n' or choice=='nope':
+        choice=False
+    else:
+        print('You did not enter a valid choice. Let\'s try that again. ')
+        display_data(df)
+        return
+
+    if choice:
+        while 1:
+            for i in range(5):
+                print(df.iloc[i])
+                print()
+            choice = input('Another five? Yes/No ').lower()
+            if choice=='yes' or choice=='y' or choice=='yus':
+                continue
+            elif choice=='no' or choice=='n' or choice=='nope':
+                break
+            else:
+                print('You did not enter a valid choice.')
+                return
 
 def main():
     while True:
@@ -276,11 +306,12 @@ def main():
         station_stats(df)
         trip_duration_stats(df)
         user_stats(df)
+        display_data(df)
 
-        restart = input('\nWould you like to restart? Enter yes or no.\n')
-        if restart.lower() != 'yes':
+        restart = input('\nWould you like to restart? Enter yes or no.\n').lower()
+        print()
+        if restart != 'yes' and restart != 'y' and restart != 'yus':
             break
-
 
 if __name__ == "__main__":
 	main()
